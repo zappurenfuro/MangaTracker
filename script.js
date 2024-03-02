@@ -20,11 +20,16 @@ function addOrUpdateManga(title, chapter) {
 }
 
 function deleteManga(title) {
-    let mangaList = getMangaList();
-    mangaList = mangaList.filter(manga => manga.title !== title);
-    localStorage.setItem('mangaList', JSON.stringify(mangaList));
-    displayMangaList();  // Refresh the list display
+    const isConfirmed = confirm(`Are you sure you want to delete "${title}"?`);
+    
+    if (isConfirmed) {
+        let mangaList = getMangaList();
+        mangaList = mangaList.filter(manga => manga.title !== title);
+        localStorage.setItem('mangaList', JSON.stringify(mangaList));
+        displayMangaList();  // Refresh the list display
+    }
 }
+
 
 function editManga(title) {
     const newChapter = prompt(`Update the chapter for ${title}:`);
