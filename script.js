@@ -85,3 +85,33 @@ function downloadList() {
     a.click();
     document.body.removeChild(a);
 }
+
+function backupList() {
+    const mangaList = getMangaList();
+    fetch('http://localhost:3000/send-email', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mangaList: mangaList }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            // If the server response was not ok, throw an error
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); // We can safely parse the response as JSON
+    })
+    .then(data => {
+        if (data.message) {
+            alert(data.message); // Alert with the message from the server
+        } else {
+            throw new Error('Unexpected response from the server');
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred while sending the backup email.');
+    });
+}
+
