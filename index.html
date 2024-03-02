@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manga Tracker</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <h1>Manga Tracker</h1>
+    <input type="text" id="mangaTitle" placeholder="Manga Title" />
+    <input type="number" id="mangaChapter" placeholder="Current Chapter" />
+    <button onclick="addOrUpdateManga()">Add/Update</button>
+    <button onclick="displayMangaList()">Display List</button>
+    <input type="file" id="fileInput" />
+    <button onclick="loadData()">Load Data</button>
+    <button onclick="downloadList()">Download List</button>
+    <div id="mangaList"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
