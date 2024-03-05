@@ -2,21 +2,20 @@ function getMangaList() {
     return JSON.parse(localStorage.getItem('mangaList') || '[]');
 }
 
-function addOrUpdateManga(title, chapter) {
-    if (!title) title = document.getElementById('mangaTitle').value;
-    if (!chapter) chapter = document.getElementById('mangaChapter').value;
-
+function addOrUpdateManga(title, chapter, lastUpdated) {
     const mangaList = getMangaList();
     const mangaIndex = mangaList.findIndex(manga => manga.title === title);
+    const now = lastUpdated || new Date().toISOString(); // Use the passed timestamp or generate a new one
 
     if (mangaIndex > -1) {
         mangaList[mangaIndex].chapter = chapter;
+        mangaList[mangaIndex].lastUpdated = now; // Update the timestamp
     } else {
-        mangaList.push({ title, chapter });
+        mangaList.push({ title, chapter, lastUpdated: now, addedDate: now });
     }
 
     localStorage.setItem('mangaList', JSON.stringify(mangaList));
-    displayMangaList();  // Refresh the list display
+    displayMangaList(); // Refresh the list
 }
 
 function deleteManga(title) {
@@ -34,7 +33,9 @@ function deleteManga(title) {
 function editManga(title) {
     const newChapter = prompt(`Update the chapter for ${title}:`);
     if (newChapter) {
-        addOrUpdateManga(title, newChapter);
+        const now = new Date().toISOString(); // Generate the current timestamp
+        addOrUpdateManga(title, newChapter, now); // Pass it to the addOrUpdateManga function
+        displayMangaList(); // Refresh the list
     }
 }
 
@@ -43,14 +44,24 @@ function displayMangaList() {
     const listContainer = document.getElementById('mangaList');
     listContainer.innerHTML = '';
 
+    const now = new Date();
     mangaList.forEach(manga => {
         const mangaElement = document.createElement('div');
-        mangaElement.innerHTML = `${manga.title} - Chapter ${manga.chapter} 
-                                 <button onclick="editManga('${manga.title.replace(/'/g, "\\'")}')">Edit</button> 
-                                 <button onclick="deleteManga('${manga.title.replace(/'/g, "\\'")}')">Delete</button>`;
+        
+        // Check if the manga was updated in the last 2 weeks
+        const lastUpdatedTime = new Date(manga.lastUpdated);
+        const isRecentlyUpdated = (now - lastUpdatedTime) < (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
+
+        mangaElement.innerHTML = `
+            <span style="color: ${isRecentlyUpdated ? 'red' : 'white'};">${manga.title} - Chapter ${manga.chapter}</span>
+            <button class="edit-btn" data-title="${manga.title}">Edit</button>
+            <button class="delete-btn" data-title="${manga.title}">Delete</button>
+        `;
+        
         listContainer.appendChild(mangaElement);
     });
 }
+
 
 function loadData() {
     const input = document.getElementById('fileInput');
@@ -120,3 +131,16 @@ function backupList() {
     });
 }
 
+document.getElementById('mangaList').addEventListener('click', function(event) {
+    // Check if the clicked element is an edit button
+    if (event.target && event.target.matches('.edit-btn')) {
+        const title = event.target.getAttribute('data-title');
+        editManga(title);
+    }
+    
+    // Check if the clicked element is a delete button
+    if (event.target && event.target.matches('.delete-btn')) {
+        const title = event.target.getAttribute('data-title');
+        deleteManga(title);
+    }
+});
