@@ -4,7 +4,8 @@ const sortBtn = document.getElementById('sortBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const backupBtn = document.getElementById('backupBtn');
 const mangaList = document.getElementById('mangaList');
-
+const newEntryInput = document.getElementById('newEntryInput');
+const addEntryBtn = document.getElementById('addEntryBtn');
 
 let mangaData = [];
 let sortOrder = 'default';
@@ -57,43 +58,43 @@ downloadBtn.addEventListener('click', () => {
 function updateMangaList() {
     mangaList.innerHTML = '';
     mangaData.forEach((manga, index) => {
-      const li = document.createElement('li');
-      const mangaText = document.createElement('span');
-      mangaText.innerHTML = manga;
-      li.appendChild(mangaText);
-  
-      const btnGroup = document.createElement('div');
-      btnGroup.classList.add('btn-group');
-  
-      const updateBtn = document.createElement('button');
-      updateBtn.textContent = 'Update';
-      updateBtn.classList.add('btn');
-      updateBtn.addEventListener('click', () => {
-        const newChapter = prompt('Enter the new chapter number:', manga.split(' ch')[1]);
-        if (newChapter !== null) {
-          const updatedManga = `<span style="color:white; font-weight: bold;">${manga.split(' ch')[0]}</span> ch${newChapter}`;
-          mangaData[index] = updatedManga;
-          updateMangaList();
-          saveToLocalStorage();
-        }
-      });
-      btnGroup.appendChild(updateBtn);
-  
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = 'Delete';
-      deleteBtn.classList.add('btn');
-      deleteBtn.addEventListener('click', () => {
-        mangaData.splice(index, 1);
-        updateMangaList();
-        saveToLocalStorage();
-      });
-      btnGroup.appendChild(deleteBtn);
-  
-      li.appendChild(btnGroup);
-  
-      mangaList.appendChild(li);
+        const li = document.createElement('li');
+        const mangaText = document.createElement('span');
+        mangaText.innerHTML = manga;
+        li.appendChild(mangaText);
+
+        const btnGroup = document.createElement('div');
+        btnGroup.classList.add('btn-group');
+
+        const updateBtn = document.createElement('button');
+        updateBtn.textContent = 'Update';
+        updateBtn.classList.add('btn');
+        updateBtn.addEventListener('click', () => {
+            const newChapter = prompt('Enter the new chapter number:', manga.split(' ch')[1]);
+            if (newChapter !== null) {
+                const updatedManga = `<span style="color:white; font-weight: bold;">${manga.split(' ch')[0]}</span> ch${newChapter}`;
+                mangaData[index] = updatedManga;
+                updateMangaList();
+                saveToLocalStorage();
+            }
+        });
+        btnGroup.appendChild(updateBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('btn');
+        deleteBtn.addEventListener('click', () => {
+            mangaData.splice(index, 1);
+            updateMangaList();
+            saveToLocalStorage();
+        });
+        btnGroup.appendChild(deleteBtn);
+
+        li.appendChild(btnGroup);
+
+        mangaList.appendChild(li);
     });
-  }
+}
 
 // Save manga list to local storage
 function saveToLocalStorage() {
@@ -106,6 +107,17 @@ if (storedData) {
     mangaData = storedData;
     updateMangaList();
 }
+
+// Add new entry
+addEntryBtn.addEventListener('click', () => {
+    const newEntry = newEntryInput.value.trim();
+    if (newEntry) {
+        mangaData.push(`${newEntry} ch1`);
+        newEntryInput.value = '';
+        updateMangaList();
+        saveToLocalStorage();
+    }
+});
 
 // Backup manga list
 backupBtn.addEventListener('click', () => {
@@ -124,22 +136,22 @@ backupBtn.addEventListener('click', () => {
         },
         body: JSON.stringify({ mangaList: formattedMangaList }),
     })
-    .then(response => {
-        if (!response.ok) {
-            // If the server response was not ok, throw an error
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.message) {
-            alert(data.message); // Alert with the message from the server
-        } else {
-            throw new Error('Unexpected response from the server');
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('An error occurred while sending the backup email.');
-    });
+        .then(response => {
+            if (!response.ok) {
+                // If the server response was not ok, throw an error
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // We can safely parse the response as JSON
+        })
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // Alert with the message from the server
+            } else {
+                throw new Error('Unexpected response from the server');
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('An error occurred while sending the backup email.');
+        });
 });
