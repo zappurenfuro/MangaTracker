@@ -129,7 +129,7 @@ backupBtn.addEventListener('click', () => {
         return null; // Or handle this case differently if needed
     }).filter(entry => entry !== null);
 
-    fetch('http://localhost:3000/send-email', {
+    fetch('https://mangatracker-uq65.onrender.com/send-email', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
